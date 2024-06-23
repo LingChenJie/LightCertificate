@@ -1,0 +1,65 @@
+// 创建keystore
+keytool -genkey -alias mine -keyalg RSA -keysize 2048 -validity 36500 -keystore mine.keystore
+
+// 查看keystore信息
+keytool -list -v -keystore mine.keystore -storepass '123456'
+
+// 查看keystore证书信息
+keytool -list -rfc -keystore mine.keystore -storepass '123456'
+
+
+
+// 查看bks信息
+keytool -list -v -keystore keyStore.bks -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar" -storetype BKS -storepass '123456'
+
+// 查看bks证书库列表
+keytool -list -rfc -keystore keyStore.bks -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar" -storepass '123456'
+
+
+
+// 从bks证书库中导出cer证书
+keytool -export -alias ca -file ca.cer -keystore ca.bks -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar" -storepass '123456'
+
+// 查看单个cer证书信息
+keytool -printcert -file ca.cer
+
+// 导入根证书cer到bks库
+keytool -importcert -v -trustcacerts -alias ca -file ca.cer -keystore caa.bks -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar" -storepass '123456'
+
+
+
+// 从keystore导出公钥证书cer
+keytool -export -alias mine -keystore mine.keystore -rfc -file mine.cer -storepass '123456'
+
+// truststore的生成以及公钥证书cer的导入
+keytool -import -alias mine -file mine.cer -keystore truststore.keystore -storepass '12345678' -keypass '12345678'
+
+
+
+// Android SSL BKS证书生成
+// 1.生成服务器jks证书:
+keytool -genkey -alias peer -keystore peer.jks
+// 2.导出cert证书:
+keytool -exportcert -alias peer -file peer.cert -keystore peer.jks
+// 3.生成Android客户端bks密钥库
+//生成私钥库
+keytool -importcert -keystore keyStore.bks -file peer.cert -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar"
+//生成公钥库
+keytool -importcert -trustcacerts -keystore trustStore.bks -file peer.cert -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar"
+// 4.查看密钥库详情
+keytool -list -v -keystore keyStore.bks -storepass 123456 -storetype BKS -provider org.bouncycastle.jce.provider.BouncyCastleProvider -providerpath "bcprov-jdk15on-1.70.jar"
+
+
+
+
+keyTool常用命令：
+-alias 产生别名(default：mykey)
+-keystore 指定密钥库的名称
+-keyalg 指定密钥的算法 (如 RSA、DSA，default：DSA)
+-validity 指定创建的证书有效期多少天(default：90)
+-keysize 指定密钥长度(default：1024，范围：512 ~ 2048)
+-storepass 指定密钥库的密码(获取 keystore 信息所需的密码)
+-keypass 指定别名条目的密码(私钥的密码)
+-dname 指定证书拥有者信息（"CN=名字与姓氏,OU=组织单位名称,O=组织名称,L=城市或区域名称,ST=州或省份名称,C=单位的两字母国家代码"）
+-list 显示密钥库中的证书信息
+-delete 删除密钥库中某条目

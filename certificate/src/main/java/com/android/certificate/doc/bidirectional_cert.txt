@@ -1,0 +1,38 @@
+// 1.生成客户端keystore
+keytool -genkeypair -alias client -keyalg RSA -validity 3650 -keypass client -storepass client -keystore client.jks
+
+// 2.生成服务端keystore
+keytool -genkeypair -alias server -keyalg RSA -validity 3650 -keypass client -storepass client -keystore server.keystore
+
+// 3.导出客户端证书
+keytool -export -alias client -file client.cer -keystore client.jks -storepass client
+
+// 4.导出服务端证书
+keytool -export -alias server -file server.cer -keystore server.keystore -storepass client
+
+// 5.重点：证书交换
+// 将客户端证书导入服务端keystore中，再将服务端证书导入客户端keystore中， 一个keystore可以导入多个证书，生成证书列表。
+// 生成客户端信任证书库(由服务端证书生成的证书库)：
+keytool -import -v -alias server -file server.cer -keystore truststore.jks -storepass client
+// 将客户端证书导入到服务器证书库(使得服务器信任客户端证书)：
+keytool -import -v -alias client -file client.cer -keystore server.keystore -storepass client
+
+// 6.生成Android识别的BKS库文件
+用Portecle工具转成bks格式，最新版本是1.11
+下载链接：https://sourceforge.net/projects/portecle/
+运行protecle.jar将client.jks和truststore.jks分别转换成client.bks和truststore.bks,然后放到android客户端的assert目录下
+>File -> open Keystore File -> 选择证书库文件 -> 输入密码 -> Tools -> change keystore type -> BKS -> save keystore as -> 保存即可
+　
+// 7.配置Tomcat服务器
+修改server.xml文件，配置8443端口
+<Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+           maxThreads="150" SSLEnabled="true" scheme="https" secure="true"
+           clientAuth="true" sslProtocol="TLS"
+           keystoreFile="${catalina.base}/key/server.keystore" keystorePass="123456"
+           truststoreFile="${catalina.base}/key/server.keystore" truststorePass="123456"/>
+ 备注: - keystoreFile：指定服务器密钥库，可以配置成绝对路径，本例中是在Tomcat目录中创建了一个名为key的文件夹，仅供参考。
+      - keystorePass：密钥库生成时的密码
+      - truststoreFile：受信任密钥库，和密钥库相同即可
+      - truststorePass：受信任密钥库密码
+
+// 8.SSLHelper
