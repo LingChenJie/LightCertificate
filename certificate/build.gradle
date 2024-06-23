@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.android.certificate'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         minSdk 24
@@ -32,12 +32,9 @@ android {
 
 dependencies {
 
-    implementation project(":architecture")
+    implementation 'com.github.LingChenJie:LightArchitecture:1.1.12'
     implementation files('libs/bcprov-jdk15on-1.70.jar')
 
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

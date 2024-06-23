@@ -19,9 +19,5 @@ dependencyResolutionManagement {
         maven { url "https://mvnrepository.com/artifact/com.itextpdf/itext-asian"}
     }
 }
-rootProject.name = "LightArchitecture"
-include ':app'
-include ':architecture'
-include ':xhd'
-//include ':certificate'
-include ':notes'
+rootProject.name = "LightCertificate"
+include ':certificate'
